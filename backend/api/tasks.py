@@ -13,12 +13,16 @@ def _ensure_dirs(path: str):
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
 
-def _load_models():
-    global _whisper_model, _nllb_pipeline
+def _load_whisper():
+    global _whisper_model
     if _whisper_model is None:
         import whisper
         # CPU-friendly size; change to 'small'/'medium' if needed
         _whisper_model = whisper.load_model("base")
+
+
+def _load_nllb():
+    global _nllb_pipeline
     if _nllb_pipeline is None:
         from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
         import os as _os
@@ -147,7 +151,7 @@ def _to_nllb(code: str) -> str:
 
 
 def _translate_text(text: str, tgt_lang_code: str, src_lang_code: str = 'en') -> str:
-    _load_models()
+    _load_nllb()
     # Ensure we pass valid NLLB src/tgt codes
     src = _to_nllb(src_lang_code)
     tgt = _to_nllb(tgt_lang_code)
@@ -169,7 +173,8 @@ def _process_job(job: Job):
     work_dir = os.path.join(settings.MEDIA_ROOT, "jobs", str(job.id))
     os.makedirs(work_dir, exist_ok=True)
     try:
-        _load_models()
+        _load_whisper()
+        _load_nllb()
         # Prepare audio path (standardized 16k mono wav) and load samples
         audio_path = _extract_audio_if_needed(job.input_path, work_dir)
         audio_samples = _read_wav_numpy(audio_path)
