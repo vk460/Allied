@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 import os
+import re
 import uuid
 from django.conf import settings
 from .models import Job, ApiKey
@@ -89,6 +90,62 @@ def translate(request):
         translation = sync_translate_text(source_text, target_lang, source_lang)
     except Exception as ex:
         return Response({"detail": f"translation failed: {ex}"}, status=500)
+    # Apply EN->HI education glossary post-corrections similar to the reference notebook
+    try:
+        def _apply_glossary_injection_to_translation(nllb_translation: str, replacement_map: dict) -> str:
+            final = nllb_translation
+            # Replace longer phrases first
+            for generic in sorted(replacement_map.keys(), key=len, reverse=True):
+                preferred = replacement_map[generic]
+                pattern = r"\b" + re.escape(generic) + r"\b"
+                if re.search(pattern, final, flags=re.IGNORECASE) and preferred.lower() not in final.lower():
+                    final = re.sub(pattern, preferred, final, flags=re.IGNORECASE)
+            return final
+
+        def _build_en_hi_replacement_map() -> dict:
+            # Minimal curated glossary to keep runtime low
+            EDU_GLOSSARY_EN_HI = {
+                "curriculum": "पाठ्यक्रम",
+                "pedagogy": "शिक्षणशास्त्र",
+                "assessment": "मूल्यांकन",
+                "syllabus": "पाठ्यचर्या",
+                "teacher": "शिक्षक",
+                "student": "छात्र",
+                "education": "शिक्षा",
+                "school": "विद्यालय",
+                "university": "विश्वविद्यालय",
+                "lecture": "व्याख्यान",
+                "assignment": "असाइनमेंट",
+                "homework": "गृहकार्य",
+                "degree": "डिग्री",
+                "diploma": "डिप्लोमा",
+                "scholarship": "छात्रवृत्ति",
+                "textbook": "पाठ्यपुस्तक",
+                "examination": "परीक्षा",
+                "quiz": "प्रश्नोत्तरी",
+                "academic": "शैक्षणिक",
+                "learning outcomes": "सीखने के परिणाम",
+            }
+            repl = {}
+            for src_term, preferred in EDU_GLOSSARY_EN_HI.items():
+                try:
+                    generic = sync_translate_text(src_term, "hi", "en").strip()
+                except Exception:
+                    continue
+                if generic and generic.lower() != preferred.lower() and generic.lower() != src_term.lower():
+                    repl[generic] = preferred
+            return repl
+
+        # Only apply when the effective source is English and target is Hindi
+        src_is_en = str(source_lang).lower() in ("en", "eng_latn")
+        tgt_is_hi = str(target_lang).lower() in ("hi", "hin_deva")
+        if src_is_en and tgt_is_hi and source_text.strip():
+            replacement_map = _build_en_hi_replacement_map()
+            if replacement_map:
+                translation = _apply_glossary_injection_to_translation(translation, replacement_map)
+    except Exception:
+        # Fail open: glossary post-correction is optional
+        pass
     return Response(
         {
             "text": source_text,
