@@ -56,7 +56,7 @@ export default function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+  <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-2 sm:p-4">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
@@ -64,26 +64,26 @@ export default function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps)
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative w-full max-w-md">
+  <div className="relative w-full max-w-md sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
         {/* Logo and Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-2xl">
+  <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 sm:mb-6 shadow-2xl">
             <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
             </svg>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-1 sm:mb-2">
             Welcome Back
           </h1>
-          <p className="text-slate-400">Sign in to your localization dashboard</p>
+          <p className="text-slate-400 text-sm sm:text-base">Sign in to your localization dashboard</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-          <form onSubmit={handleSubmit} className="space-y-6">
+  <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-4 sm:p-8 shadow-2xl">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1 sm:mb-2">
                 Email Address
               </label>
               <div className="relative">
@@ -92,7 +92,7 @@ export default function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps)
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors ${
+                  className={`w-full pl-10 pr-4 py-2 sm:py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-slate-300 placeholder-slate-300 text-sm sm:text-base ${
                     errors.email 
                       ? 'border-red-500/50 focus:ring-red-500/50' 
                       : 'border-white/10 focus:ring-blue-500/50 focus:border-transparent'
@@ -107,7 +107,7 @@ export default function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps)
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1 sm:mb-2">
                 Password
               </label>
               <div className="relative">
@@ -116,7 +116,7 @@ export default function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps)
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors ${
+                  className={`w-full pl-10 pr-12 py-2 sm:py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-slate-300 placeholder-slate-300 text-sm sm:text-base ${
                     errors.password 
                       ? 'border-red-500/50 focus:ring-red-500/50' 
                       : 'border-white/10 focus:ring-blue-500/50 focus:border-transparent'
@@ -141,17 +141,17 @@ export default function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps)
             </div>
 
             {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   className="w-4 h-4 text-blue-500 bg-slate-800 border-slate-600 rounded focus:ring-blue-500"
                 />
-                <span className="ml-2 text-sm text-slate-300">Remember me</span>
+                <span className="ml-2 text-xs sm:text-sm text-slate-300">Remember me</span>
               </label>
               <button
                 type="button"
-                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                className="text-xs sm:text-sm text-blue-400 hover:text-blue-300 transition-colors"
               >
                 Forgot password?
               </button>
@@ -161,7 +161,7 @@ export default function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps)
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="w-full flex items-center justify-center gap-2 py-2 sm:py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               {isLoading ? (
                 <>
@@ -178,15 +178,15 @@ export default function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps)
           </form>
 
           {/* Divider */}
-          <div className="flex items-center my-6">
+          <div className="flex items-center my-4 sm:my-6">
             <div className="flex-1 border-t border-white/10"></div>
             <span className="px-4 text-sm text-slate-400">or</span>
             <div className="flex-1 border-t border-white/10"></div>
           </div>
 
           {/* Social Login */}
-          <div className="space-y-3">
-            <button className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-slate-800/50 hover:bg-slate-800 border border-white/10 text-slate-300 rounded-xl transition-colors">
+          <div className="space-y-2 sm:space-y-3">
+            <button className="w-full flex items-center justify-center gap-2 sm:gap-3 py-2 sm:py-3 px-4 bg-slate-800/50 hover:bg-slate-800 border border-white/10 text-slate-300 rounded-xl transition-colors text-sm sm:text-base">
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -196,7 +196,7 @@ export default function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps)
               Continue with Google
             </button>
             
-            <button className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-slate-800/50 hover:bg-slate-800 border border-white/10 text-slate-300 rounded-xl transition-colors">
+            <button className="w-full flex items-center justify-center gap-2 sm:gap-3 py-2 sm:py-3 px-4 bg-slate-800/50 hover:bg-slate-800 border border-white/10 text-slate-300 rounded-xl transition-colors text-sm sm:text-base">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
               </svg>
@@ -205,12 +205,12 @@ export default function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps)
           </div>
 
           {/* Sign Up Link */}
-          <div className="text-center mt-6">
-            <p className="text-slate-400">
+          <div className="text-center mt-4 sm:mt-6">
+            <p className="text-slate-400 text-xs sm:text-base">
               Don't have an account?{' '}
               <button
                 onClick={onSwitchToSignup}
-                className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                className="text-blue-400 hover:text-blue-300 font-medium transition-colors text-xs sm:text-base"
               >
                 Sign up for free
               </button>
