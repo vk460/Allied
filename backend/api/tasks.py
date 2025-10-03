@@ -1,4 +1,5 @@
 import os
+import logging
 import threading
 import traceback
 from django.conf import settings
@@ -31,9 +32,16 @@ def _load_nllb():
         local_dir = _os.getenv("NLLB_LOCAL_PATH")
         try:
             if local_dir and _os.path.exists(local_dir):
+                logging.getLogger(__name__).info(
+                    f"Loading NLLB from local directory: {local_dir}"
+                )
                 tok = AutoTokenizer.from_pretrained(local_dir, local_files_only=True)
                 mdl = AutoModelForSeq2SeqLM.from_pretrained(local_dir, local_files_only=True)
             else:
+                logging.getLogger(__name__).info(
+                    "Loading NLLB from hub: %s (first download may be ~1GB and take several minutes)",
+                    model_name,
+                )
                 tok = AutoTokenizer.from_pretrained(model_name)
                 mdl = AutoModelForSeq2SeqLM.from_pretrained(model_name)
             _nllb_pipeline = pipeline("translation", model=mdl, tokenizer=tok)
