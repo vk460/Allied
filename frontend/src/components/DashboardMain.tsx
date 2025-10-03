@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import UsageCard from './UsageCard'
 import QuickActions from './QuickActions'
 import ApiKeysPanel from './ApiKeysPanel'
@@ -10,8 +10,19 @@ import {
   ArrowTrendingUpIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline'
+import { api } from '../lib/api'
 
 export default function DashboardMain(){
+  const [backendStatus, setBackendStatus] = useState<'ok' | 'error' | 'unknown'>('unknown')
+  const [backendMsg, setBackendMsg] = useState<string>('')
+
+  useEffect(() => {
+    let mounted = true
+    api.health()
+      .then((res) => { if (!mounted) return; setBackendStatus('ok'); setBackendMsg(res.status) })
+      .catch((err) => { if (!mounted) return; setBackendStatus('error'); setBackendMsg(err.message || 'error') })
+    return () => { mounted = false }
+  }, [])
   const recentActivities = [
     {
       id: 1,
@@ -64,6 +75,10 @@ export default function DashboardMain(){
           <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 rounded-xl">
             <SparklesIcon className="w-4 h-4 text-emerald-400" />
             <span className="text-sm font-medium text-emerald-400">Free Plan</span>
+          </div>
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs ${backendStatus==='ok' ? 'border-green-500/30 bg-green-500/10 text-green-400' : backendStatus==='error' ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-slate-500/30 bg-slate-500/10 text-slate-300'}`}>
+            <span>API</span>
+            <span className="opacity-80">{backendStatus==='unknown' ? 'checking...' : backendMsg}</span>
           </div>
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
             <span className="text-white font-semibold">AK</span>

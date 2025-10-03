@@ -5,7 +5,6 @@ import {
   HomeIcon, 
   KeyIcon, 
   ChartBarIcon, 
-  BookOpenIcon, 
   ChatBubbleLeftRightIcon, 
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
@@ -25,7 +24,7 @@ const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: HomeIcon },
   { id: 'api-keys', label: 'API Keys', icon: KeyIcon },
   { id: 'usage-billing', label: 'Usage & Billing', icon: ChartBarIcon },
-  { id: 'glossary', label: 'Glossary', icon: BookOpenIcon },
+  { id: 'test-client', label: 'Test Client', icon: ChatBubbleLeftRightIcon },
   { id: 'feedback', label: 'Feedback', icon: ChatBubbleLeftRightIcon },
   { id: 'settings', label: 'Settings', icon: Cog6ToothIcon },
 ]

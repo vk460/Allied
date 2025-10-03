@@ -1,14 +1,14 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Sidebar from './components/Sidebar'
 import DashboardMain from './components/DashboardMain'
 import LoginPage from './components/auth/LoginPage'
 import SignupPage from './components/auth/SignupPage'
 import ApiKeysPage from './components/dashboard/ApiKeysPage'
 import UsageBillingPage from './components/dashboard/UsageBillingPage'
-import GlossaryPage from './components/dashboard/GlossaryPage'
+import TestClient from './components/TestClient'
 
 type AuthState = 'login' | 'signup' | 'authenticated'
-type DashboardPage = 'dashboard' | 'api-keys' | 'usage-billing' | 'glossary' | 'feedback' | 'settings'
+type DashboardPage = 'dashboard' | 'api-keys' | 'usage-billing' | 'test-client' | 'feedback' | 'settings'
 
 export default function App() {
   const [authState, setAuthState] = useState<AuthState>('login')
@@ -16,22 +16,40 @@ export default function App() {
   const [collapsed, setCollapsed] = useState(false)
   const [user, setUser] = useState<{ email: string; name: string } | null>(null)
 
+  // Initialize auth state from localStorage on first load
+  useEffect(() => {
+    const savedAuth = localStorage.getItem('auth_state') as AuthState | null
+    const savedUser = localStorage.getItem('auth_user')
+    if (savedAuth === 'authenticated' && savedUser) {
+      try {
+        setUser(JSON.parse(savedUser))
+        setAuthState('authenticated')
+      } catch {}
+    }
+  }, [])
+
   const handleLogin = (email: string, password: string) => {
     // Simulate successful login
     setUser({ email, name: email.split('@')[0] })
     setAuthState('authenticated')
+    localStorage.setItem('auth_state', 'authenticated')
+    localStorage.setItem('auth_user', JSON.stringify({ email, name: email.split('@')[0] }))
   }
 
   const handleSignup = (data: any) => {
     // Simulate successful signup
     setUser({ email: data.email, name: data.firstName })
     setAuthState('authenticated')
+    localStorage.setItem('auth_state', 'authenticated')
+    localStorage.setItem('auth_user', JSON.stringify({ email: data.email, name: data.firstName }))
   }
 
   const handleLogout = () => {
     setUser(null)
     setAuthState('login')
     setCurrentPage('dashboard')
+    localStorage.removeItem('auth_state')
+    localStorage.removeItem('auth_user')
   }
 
   const renderCurrentPage = () => {
@@ -42,8 +60,8 @@ export default function App() {
         return <ApiKeysPage />
       case 'usage-billing':
         return <UsageBillingPage />
-      case 'glossary':
-        return <GlossaryPage />
+      case 'test-client':
+        return <TestClient />
       case 'feedback':
         return (
           <div className="space-y-6">
@@ -115,7 +133,7 @@ export default function App() {
             collapsed={collapsed} 
             onToggle={() => setCollapsed(c => !c)}
             currentPage={currentPage}
-            onPageChange={setCurrentPage}
+            onPageChange={(p) => setCurrentPage(p as DashboardPage)}
             onLogout={handleLogout}
             user={user}
           />

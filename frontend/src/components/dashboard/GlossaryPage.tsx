@@ -77,7 +77,7 @@ export default function GlossaryPage() {
 
   const filteredEntries = entries.filter(entry => {
     const matchesSearch = entry.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      Object.values(entry.translations).some(translation => 
+      Object.values(entry.translations).some(translation =>
         translation.toLowerCase().includes(searchTerm.toLowerCase())
       )
     const matchesCategory = selectedCategory === 'All' || entry.category === selectedCategory
@@ -102,8 +102,8 @@ export default function GlossaryPage() {
   }
 
   function updateEntry(entry: GlossaryEntry) {
-    setEntries(prev => prev.map(e => 
-      e.id === entry.id 
+    setEntries(prev => prev.map(e =>
+      e.id === entry.id
         ? { ...entry, updated: new Date().toISOString().split('T')[0] }
         : e
     ))
@@ -183,7 +183,7 @@ export default function GlossaryPage() {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Object.entries(entry.translations).map(([lang, translation]) => {
                     const language = LANGUAGES.find(l => l.code === lang)
@@ -198,13 +198,13 @@ export default function GlossaryPage() {
                     )
                   })}
                 </div>
-                
+
                 <div className="flex items-center gap-4 mt-4 text-xs text-slate-400">
                   <span>Created: {new Date(entry.created).toLocaleDateString()}</span>
                   <span>Updated: {new Date(entry.updated).toLocaleDateString()}</span>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2 ml-4">
                 <button
                   onClick={() => startEdit(entry)}
@@ -244,7 +244,7 @@ export default function GlossaryPage() {
             <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
               {editingEntry ? 'Edit Term' : 'Add New Term'}
             </h3>
-            
+
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -259,7 +259,7 @@ export default function GlossaryPage() {
                     className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Category
