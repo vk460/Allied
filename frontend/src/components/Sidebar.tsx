@@ -5,6 +5,7 @@ import {
   HomeIcon, 
   KeyIcon, 
   ChartBarIcon, 
+  BookOpenIcon, 
   ChatBubbleLeftRightIcon, 
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
@@ -24,15 +25,14 @@ const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: HomeIcon },
   { id: 'api-keys', label: 'API Keys', icon: KeyIcon },
   { id: 'usage-billing', label: 'Usage & Billing', icon: ChartBarIcon },
-  { id: 'test-client', label: 'Test Client', icon: ChatBubbleLeftRightIcon },
   { id: 'feedback', label: 'Feedback', icon: ChatBubbleLeftRightIcon },
   { id: 'settings', label: 'Settings', icon: Cog6ToothIcon },
 ]
 
 export default function Sidebar({ collapsed, onToggle, currentPage, onPageChange, onLogout, user }: SidebarProps) {
   return (
-    <aside className={clsx('w-80 transition-all duration-300', collapsed && 'w-20')}>
-      <div className="p-4 card rounded-2xl h-full flex flex-col">
+    <aside className={clsx('transition-all duration-300 flex-shrink-0', collapsed ? 'w-20' : 'w-80')}>
+      <div className="p-4 card rounded-2xl h-full flex flex-col overflow-visible">
         {/* Header with Logo */}
         <div className="flex items-center justify-between mb-6">
           {!collapsed ? (
@@ -42,14 +42,13 @@ export default function Sidebar({ collapsed, onToggle, currentPage, onPageChange
           )}
           <button 
             onClick={onToggle} 
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className={clsx(
+              'w-8 h-8 rounded-md border transition-colors duration-200 flex items-center justify-center',
+              'bg-white/10 hover:bg-white/20 border-white/20 text-slate-100'
+            )}
           >
-            <div className="w-5 h-5 flex items-center justify-center">
-              <div className={clsx(
-                'w-3 h-3 border-l-2 border-t-2 border-slate-400 transform transition-transform duration-200',
-                collapsed ? 'rotate-45' : '-rotate-45'
-              )} />
-            </div>
+            <span className="text-base leading-none">{collapsed ? '>' : '<'}</span>
           </button>
         </div>
 

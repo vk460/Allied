@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import UsageCard from './UsageCard'
 import QuickActions from './QuickActions'
 import ApiKeysPanel from './ApiKeysPanel'
@@ -10,19 +10,9 @@ import {
   ArrowTrendingUpIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline'
-import { api } from '../lib/api'
 
 export default function DashboardMain(){
-  const [backendStatus, setBackendStatus] = useState<'ok' | 'error' | 'unknown'>('unknown')
-  const [backendMsg, setBackendMsg] = useState<string>('')
-
-  useEffect(() => {
-    let mounted = true
-    api.health()
-      .then((res) => { if (!mounted) return; setBackendStatus('ok'); setBackendMsg(res.status) })
-      .catch((err) => { if (!mounted) return; setBackendStatus('error'); setBackendMsg(err.message || 'error') })
-    return () => { mounted = false }
-  }, [])
+  const [profileOpen, setProfileOpen] = useState(false)
   const recentActivities = [
     {
       id: 1,
@@ -64,7 +54,7 @@ export default function DashboardMain(){
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between relative">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Welcome back! 👋
@@ -76,30 +66,47 @@ export default function DashboardMain(){
             <SparklesIcon className="w-4 h-4 text-emerald-400" />
             <span className="text-sm font-medium text-emerald-400">Free Plan</span>
           </div>
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs ${backendStatus==='ok' ? 'border-green-500/30 bg-green-500/10 text-green-400' : backendStatus==='error' ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-slate-500/30 bg-slate-500/10 text-slate-300'}`}>
-            <span>API</span>
-            <span className="opacity-80">{backendStatus==='unknown' ? 'checking...' : backendMsg}</span>
-          </div>
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+          <button 
+            onClick={() => setProfileOpen(v => !v)}
+            className="relative w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            aria-haspopup="menu"
+            aria-expanded={profileOpen}
+          >
             <span className="text-white font-semibold">AK</span>
-          </div>
+          </button>
+          {profileOpen && (
+            <div className="absolute right-0 top-16 z-10 w-48 card rounded-xl border border-white/10 overflow-hidden">
+              <button className="w-full text-left px-4 py-3 hover:bg-white/5 text-slate-200">Profile</button>
+              <button className="w-full text-left px-4 py-3 hover:bg-white/5 text-slate-200">Settings</button>
+              <button 
+                onClick={() => {
+                  try { localStorage.removeItem('auth_user') } catch {}
+                  window.location.reload()
+                }}
+                className="w-full text-left px-4 py-3 hover:bg-white/5 text-red-300"
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8 space-y-6">
           <UsageCard />
-          
-          {/* Enhanced Recent Activity */}
+          {/* Quick Actions now in main column */}
+          <QuickActions />
+        </div>
+        
+        <div className="lg:col-span-4 space-y-6">
+          {/* Recent Activity moved to sidebar column */}
           <div className="card p-6 rounded-2xl border border-white/5">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <ClockIcon className="w-5 h-5 text-slate-400" />
                 Recent Activity
               </h3>
-              <button className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                View All
-              </button>
             </div>
             <div className="space-y-4">
               {recentActivities.map((activity) => {
@@ -119,11 +126,7 @@ export default function DashboardMain(){
               })}
             </div>
           </div>
-        </div>
-        
-        <div className="lg:col-span-4 space-y-6">
-          <QuickActions />
-          <ApiKeysPanel />
+          {/* Removed APIKeysPanel from right column as requested */}
         </div>
       </div>
     </div>

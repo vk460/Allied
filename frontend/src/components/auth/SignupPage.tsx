@@ -145,12 +145,12 @@ export default function SignupPage({ onSignup, onSwitchToLogin }: SignupPageProp
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    className={`w-full pl-10 pr-4 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors ${
+                    className={`w-full pl-10 pr-4 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-white placeholder-slate-400 ${
                       errors.firstName 
                         ? 'border-red-500/50 focus:ring-red-500/50' 
                         : 'border-white/10 focus:ring-emerald-500/50 focus:border-transparent'
                     }`}
-                    placeholder="John"
+                    placeholder="Aarav"
                   />
                 </div>
                 {errors.firstName && (
@@ -168,12 +168,12 @@ export default function SignupPage({ onSignup, onSwitchToLogin }: SignupPageProp
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    className={`w-full pl-10 pr-4 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors ${
+                    className={`w-full pl-10 pr-4 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-white placeholder-slate-400 ${
                       errors.lastName 
                         ? 'border-red-500/50 focus:ring-red-500/50' 
                         : 'border-white/10 focus:ring-emerald-500/50 focus:border-transparent'
                     }`}
-                    placeholder="Doe"
+                    placeholder="Sharma"
                   />
                 </div>
                 {errors.lastName && (
@@ -193,7 +193,7 @@ export default function SignupPage({ onSignup, onSwitchToLogin }: SignupPageProp
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors ${
+                  className={`w-full pl-10 pr-4 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-white placeholder-slate-400 ${
                     errors.email 
                       ? 'border-red-500/50 focus:ring-red-500/50' 
                       : 'border-white/10 focus:ring-emerald-500/50 focus:border-transparent'
@@ -215,7 +215,7 @@ export default function SignupPage({ onSignup, onSwitchToLogin }: SignupPageProp
                 type="text"
                 value={formData.company}
                 onChange={(e) => handleInputChange('company', e.target.value)}
-                className={`w-full px-4 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors ${
+                className={`w-full px-4 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-white placeholder-slate-400 ${
                   errors.company 
                     ? 'border-red-500/50 focus:ring-red-500/50' 
                     : 'border-white/10 focus:ring-emerald-500/50 focus:border-transparent'
@@ -238,7 +238,7 @@ export default function SignupPage({ onSignup, onSwitchToLogin }: SignupPageProp
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors ${
+                  className={`w-full pl-10 pr-12 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-white placeholder-slate-400 ${
                     errors.password 
                       ? 'border-red-500/50 focus:ring-red-500/50' 
                       : 'border-white/10 focus:ring-emerald-500/50 focus:border-transparent'
@@ -295,7 +295,7 @@ export default function SignupPage({ onSignup, onSwitchToLogin }: SignupPageProp
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors ${
+                  className={`w-full pl-10 pr-12 py-3 bg-slate-800/50 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-white placeholder-slate-400 ${
                     errors.confirmPassword 
                       ? 'border-red-500/50 focus:ring-red-500/50' 
                       : 'border-white/10 focus:ring-emerald-500/50 focus:border-transparent'

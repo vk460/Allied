@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { PlusIcon, KeyIcon, TrashIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
-import { api } from '../../lib/api'
 
 type KeyItem = { 
   id: string
@@ -11,52 +10,38 @@ type KeyItem = {
   key?: string
 }
 
-const ENV_ADMIN_KEY = (import.meta as any).env?.VITE_API_KEY || ''
+const SAMPLE_KEYS: KeyItem[] = [
+  { 
+    id: 'key_live_1', 
+    name: 'Training Portal Key', 
+    scopes: ['translate_text', 'document_translate_analyze'], 
+    created: '2025-09-20', 
+    status: 'ACTIVE',
+    key: 'lk_live_1234567890abcdef'
+  },
+  { 
+    id: 'key_live_2', 
+    name: 'Video Translator Key', 
+    scopes: ['translate_video'], 
+    created: '2025-10-02', 
+    status: 'ACTIVE',
+    key: 'lk_live_abcdef1234567890'
+  }
+]
 
 export default function ApiKeysPage() {
-  const [keys, setKeys] = useState<KeyItem[]>([])
+  const [keys, setKeys] = useState<KeyItem[]>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('created_api_keys') || '[]')
+      return [...SAMPLE_KEYS, ...stored]
+    } catch {
+      return SAMPLE_KEYS
+    }
+  })
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [newKeyName, setNewKeyName] = useState('')
   const [selectedScopes, setSelectedScopes] = useState<string[]>([])
-  const [adminKey, setAdminKey] = useState<string>('')
-  const [error, setError] = useState<string>('')
-  const [createError, setCreateError] = useState<string>('')
-  const [isCreating, setIsCreating] = useState<boolean>(false)
-
-  async function loadKeys(){
-    setError('')
-    const useKey = adminKey || ENV_ADMIN_KEY
-    if (!useKey) { setKeys([]); return }
-    const res = await api.listKeys(useKey)
-    const items = ((res?.items) || []).map((it: any) => ({
-      id: it.id,
-      name: it.name,
-      scopes: it.scopes || [],
-      created: new Date(it.created).toISOString().split('T')[0],
-      status: it.status,
-    })) as KeyItem[]
-    setKeys(items)
-  }
-
-  useEffect(() => {
-    // initialize admin key from localStorage or env
-    const saved = localStorage.getItem('admin_api_key') || ''
-    const initial = saved || ENV_ADMIN_KEY
-    setAdminKey(initial)
-  }, [])
-
-  useEffect(() => { if (adminKey || ENV_ADMIN_KEY) { loadKeys().catch((e)=>setError(e?.message||'Failed to load')) } }, [adminKey])
-
-  // Ensure a sensible default scope when opening the create modal
-  useEffect(() => {
-    if (showCreateModal && selectedScopes.length === 0) {
-      setSelectedScopes(['translate_text'])
-    }
-    if (!showCreateModal) {
-      setCreateError('')
-    }
-  }, [showCreateModal])
 
   const availableScopes = [
     { id: 'translate_text', name: 'Translate Text', description: 'Translate text content' },
@@ -65,10 +50,8 @@ export default function ApiKeysPage() {
     { id: 'document_translate_analyze', name: 'Translate/Analyze Document', description: 'Translate and summarize/analyze documents' }
   ]
 
-  async function revoke(id: string) {
-    const useKey = adminKey || ENV_ADMIN_KEY
-    await api.deleteKey(id, useKey)
-    setKeys(prev => prev.filter(k => k.id !== id))
+  function revoke(id: string) {
+    setKeys(prev => prev.map(k => k.id === id ? { ...k, status: 'REVOKED' } : k))
   }
 
   function toggleKeyVisibility(id: string) {
@@ -83,48 +66,27 @@ export default function ApiKeysPage() {
     })
   }
 
-  async function createNewKey() {
+  function createNewKey() {
     if (!newKeyName.trim()) return
-    const useKey = adminKey || ENV_ADMIN_KEY
-    setCreateError('')
-    if (!useKey) { setCreateError('Admin API key is required. Paste it above and Save.'); return }
-    if (selectedScopes.length === 0) { setCreateError('Select at least one scope.'); return }
-    let created: any
+    
+    const newKey: KeyItem = {
+      id: `key_live_${Date.now()}`,
+      name: newKeyName,
+      scopes: selectedScopes,
+      created: new Date().toISOString().split('T')[0],
+      status: 'ACTIVE',
+      key: `lk_live_${Math.random().toString(36).substring(2, 18)}`
+    }
+    
+    setKeys(prev => [...prev, newKey])
     try {
-      setIsCreating(true)
-      created = await api.createKey(newKeyName, selectedScopes, useKey)
-    } catch (e: any) {
-      // Provide clearer guidance for common network/CORS errors.
-      const msg = e?.message || 'Failed to create key'
-      const maybeCors = /Failed to fetch|NetworkError|TypeError/i.test(String(msg))
-      const backend = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:8000'
-      setCreateError(
-        maybeCors
-          ? `Failed to reach backend at ${backend}. Check that the server is running, CORS is enabled for this origin, and the URL (VITE_BACKEND_URL) is correct.`
-          : msg
-      )
-      return
-    } finally {
-      setIsCreating(false)
-    }
-    const item: KeyItem = {
-      id: created.id,
-      name: created.name,
-      scopes: created.scopes || [],
-      created: new Date(created.created).toISOString().split('T')[0],
-      status: created.status,
-      key: created.key, // show once
-    }
-    setKeys(prev => [item, ...prev])
-    setVisibleKeys(prev => new Set([...prev, item.id]))
+      const existing = JSON.parse(localStorage.getItem('created_api_keys') || '[]')
+      existing.push(newKey)
+      localStorage.setItem('created_api_keys', JSON.stringify(existing))
+    } catch {}
     setNewKeyName('')
     setSelectedScopes([])
     setShowCreateModal(false)
-  }
-
-  function onAdminKeySave(){
-    localStorage.setItem('admin_api_key', adminKey)
-    loadKeys().catch((e)=>setError(e?.message||'Failed to load'))
   }
 
   function toggleScope(scopeId: string) {
@@ -145,31 +107,12 @@ export default function ApiKeysPage() {
           <p className="text-slate-400 mt-2">Manage your API keys and access permissions</p>
         </div>
         <button
-          onClick={() => { setShowCreateModal(true); if (selectedScopes.length===0) setSelectedScopes(['translate_text']) }}
+          onClick={() => setShowCreateModal(true)}
           className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
         >
           <PlusIcon className="w-5 h-5" />
           Create New Key
         </button>
-      </div>
-
-      <div className="card p-4 rounded-2xl border border-white/5">
-        <div className="flex flex-col md:flex-row md:items-end gap-3">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-slate-300 mb-1">Admin API Key</label>
-            <input
-              value={adminKey}
-              onChange={e=>setAdminKey(e.target.value)}
-              placeholder="Paste admin API key used to manage keys"
-              className="w-full px-4 py-2 bg-slate-800/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-            />
-          </div>
-          <button onClick={onAdminKeySave} className="px-4 py-2 bg-white/10 rounded-xl">Save</button>
-        </div>
-        {!adminKey && !ENV_ADMIN_KEY && (
-          <div className="text-xs text-yellow-400 mt-2">Paste an admin API key to enable listing/creating/deleting keys.</div>
-        )}
-        {error && (<div className="text-xs text-red-400 mt-2">{error}</div>)}
       </div>
 
       <div className="grid gap-6">
@@ -195,26 +138,18 @@ export default function ApiKeysPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-slate-400">Key:</span>
                       <code className="text-sm bg-slate-800/50 px-3 py-1 rounded-lg font-mono">
-                        {visibleKeys.has(key.id) && key.key ? key.key : '••••••••••••••••••••'}
+                        {visibleKeys.has(key.id) ? key.key : '••••••••••••••••••••'}
                       </code>
                       <button
-                        onClick={() => key.key && toggleKeyVisibility(key.id)}
-                        disabled={!key.key}
-                        title={key.key ? 'Show/Hide key (visible once after creation)' : 'Key is only shown once after creation'}
-                        className="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/10"
+                        onClick={() => toggleKeyVisibility(key.id)}
+                        className="p-1 hover:bg-white/10 rounded"
                       >
-                        {key.key ? (
-                          visibleKeys.has(key.id) ?
-                            <EyeSlashIcon className="w-4 h-4 text-slate-400" /> :
-                            <EyeIcon className="w-4 h-4 text-slate-400" />
-                        ) : (
-                          <EyeIcon className="w-4 h-4 text-slate-600" />
-                        )}
+                        {visibleKeys.has(key.id) ? 
+                          <EyeSlashIcon className="w-4 h-4 text-slate-400" /> : 
+                          <EyeIcon className="w-4 h-4 text-slate-400" />
+                        }
                       </button>
                     </div>
-                    {key.key && (
-                      <div className="text-xs text-amber-300">This key is displayed only once. Copy and store it securely.</div>
-                    )}
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-slate-400">Scopes:</span>
                       <div className="flex gap-2">
@@ -237,7 +172,7 @@ export default function ApiKeysPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors duration-200"
                 >
                   <TrashIcon className="w-4 h-4" />
-                  Delete
+                  Revoke
                 </button>
               </div>
             </div>
@@ -290,11 +225,7 @@ export default function ApiKeysPage() {
               </div>
             </div>
 
-            {createError && (
-              <div className="text-sm text-red-400">{createError}</div>
-            )}
-
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex justify-end gap-3 mt-8">
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="px-6 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors duration-200"
@@ -303,10 +234,10 @@ export default function ApiKeysPage() {
               </button>
               <button
                 onClick={createNewKey}
-                disabled={isCreating}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={!newKeyName.trim() || selectedScopes.length === 0}
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all duration-200"
               >
-                {isCreating ? 'Creating…' : 'Create Key'}
+                Create Key
               </button>
             </div>
           </div>
@@ -314,4 +245,4 @@ export default function ApiKeysPage() {
       )}
     </div>
   )
- }
+}

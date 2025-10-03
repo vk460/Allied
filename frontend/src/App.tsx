@@ -5,10 +5,11 @@ import LoginPage from './components/auth/LoginPage'
 import SignupPage from './components/auth/SignupPage'
 import ApiKeysPage from './components/dashboard/ApiKeysPage'
 import UsageBillingPage from './components/dashboard/UsageBillingPage'
-import TestClient from './components/TestClient'
+import GlossaryPage from './components/dashboard/GlossaryPage'
+import FeedbackForm from './components/feedback/FeedbackForm'
 
 type AuthState = 'login' | 'signup' | 'authenticated'
-type DashboardPage = 'dashboard' | 'api-keys' | 'usage-billing' | 'test-client' | 'feedback' | 'settings'
+type DashboardPage = 'dashboard' | 'api-keys' | 'usage-billing' | 'glossary' | 'feedback' | 'settings'
 
 export default function App() {
   const [authState, setAuthState] = useState<AuthState>('login')
@@ -16,40 +17,38 @@ export default function App() {
   const [collapsed, setCollapsed] = useState(false)
   const [user, setUser] = useState<{ email: string; name: string } | null>(null)
 
-  // Initialize auth state from localStorage on first load
   useEffect(() => {
-    const savedAuth = localStorage.getItem('auth_state') as AuthState | null
-    const savedUser = localStorage.getItem('auth_user')
-    if (savedAuth === 'authenticated' && savedUser) {
-      try {
-        setUser(JSON.parse(savedUser))
-        setAuthState('authenticated')
-      } catch {}
-    }
+    try {
+      const stored = localStorage.getItem('auth_user')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed?.email) {
+          setUser({ email: parsed.email, name: parsed.name || parsed.email.split('@')[0] })
+          setAuthState('authenticated')
+        }
+      }
+    } catch {}
   }, [])
 
   const handleLogin = (email: string, password: string) => {
     // Simulate successful login
     setUser({ email, name: email.split('@')[0] })
     setAuthState('authenticated')
-    localStorage.setItem('auth_state', 'authenticated')
-    localStorage.setItem('auth_user', JSON.stringify({ email, name: email.split('@')[0] }))
   }
 
   const handleSignup = (data: any) => {
     // Simulate successful signup
     setUser({ email: data.email, name: data.firstName })
     setAuthState('authenticated')
-    localStorage.setItem('auth_state', 'authenticated')
-    localStorage.setItem('auth_user', JSON.stringify({ email: data.email, name: data.firstName }))
   }
 
   const handleLogout = () => {
     setUser(null)
     setAuthState('login')
     setCurrentPage('dashboard')
-    localStorage.removeItem('auth_state')
-    localStorage.removeItem('auth_user')
+    try {
+      localStorage.removeItem('auth_user')
+    } catch {}
   }
 
   const renderCurrentPage = () => {
@@ -60,8 +59,8 @@ export default function App() {
         return <ApiKeysPage />
       case 'usage-billing':
         return <UsageBillingPage />
-      case 'test-client':
-        return <TestClient />
+      case 'glossary':
+        return <GlossaryPage />
       case 'feedback':
         return (
           <div className="space-y-6">
@@ -69,17 +68,9 @@ export default function App() {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
                 Feedback & Support
               </h1>
-              <p className="text-slate-400 mt-2">Share your feedback and get help</p>
+              <p className="text-slate-400 mt-2">Tell us about your results and ideas. We will use this to improve future outputs.</p>
             </div>
-            <div className="card p-8 rounded-2xl text-center">
-              <div className="w-16 h-16 bg-yellow-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd"/>
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Coming Soon</h3>
-              <p className="text-slate-400">Feedback and support features are under development.</p>
-            </div>
+            <FeedbackForm />
           </div>
         )
       case 'settings':
@@ -127,19 +118,21 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-slate-100">
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="flex gap-6">
-          <Sidebar 
-            collapsed={collapsed} 
-            onToggle={() => setCollapsed(c => !c)}
-            currentPage={currentPage}
-            onPageChange={(p) => setCurrentPage(p as DashboardPage)}
-            onLogout={handleLogout}
-            user={user}
-          />
-          <div className="flex-1">
-            {renderCurrentPage()}
-          </div>
+      {/* Fixed sidebar at extreme left */}
+      <div className="fixed left-0 top-0 h-screen">
+        <Sidebar 
+          collapsed={collapsed} 
+          onToggle={() => setCollapsed(c => !c)}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          onLogout={handleLogout}
+          user={user}
+        />
+      </div>
+      {/* Content with left padding to accommodate sidebar width (w-80 or w-20) */}
+      <div className={collapsed ? 'pl-20' : 'pl-80'}> 
+        <div className="p-6">
+          {renderCurrentPage()}
         </div>
       </div>
     </div>

@@ -15,11 +15,15 @@ export default function QuickActions(){
   const [showKeyModal, setShowKeyModal] = useState(false)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [showAudioModal, setShowAudioModal] = useState(false)
+  const [showProjectKeyModal, setShowProjectKeyModal] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [newKeyName, setNewKeyName] = useState('')
   const [selectedScopes, setSelectedScopes] = useState<string[]>([])
   const [selectedDocFile, setSelectedDocFile] = useState<File | null>(null)
   const [selectedAudioFile, setSelectedAudioFile] = useState<File | null>(null)
+  const [projectKey, setProjectKey] = useState<string | null>(() => {
+    try { return localStorage.getItem('project_api_key') } catch { return null }
+  })
 
   const handleCreateKey = () => {
     setIsProcessing(true)
@@ -74,20 +78,7 @@ export default function QuickActions(){
         Quick Actions
       </h3>
       <div className="space-y-3">
-        <button 
-          onClick={() => setShowKeyModal(true)} 
-          className="w-full flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-200 group"
-        >
-          <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-            <KeyIcon className="w-5 h-5 text-blue-400" />
-          </div>
-          <div className="flex-1 text-left">
-            <div className="font-medium text-slate-200">Create API Key</div>
-            <div className="text-sm text-slate-400">Generate a new API key</div>
-          </div>
-          <PlusIcon className="w-5 h-5 text-blue-400" />
-        </button>
-
+        {/* 1. Upload Document */}
         <button 
           onClick={() => setShowUploadModal(true)}
           className="w-full flex items-center gap-3 p-4 rounded-xl bg-slate-800/30 border border-white/10 hover:bg-slate-800/50 hover:border-white/20 transition-all duration-200 group"
@@ -102,6 +93,7 @@ export default function QuickActions(){
           <ArrowUpIcon className="w-5 h-5 text-purple-400" />
         </button>
 
+        {/* 2. Translate Audio */}
         <button 
           onClick={() => setShowAudioModal(true)}
           className="w-full flex items-center gap-3 p-4 rounded-xl bg-slate-800/30 border border-white/10 hover:bg-slate-800/50 hover:border-white/20 transition-all duration-200 group"
@@ -114,6 +106,36 @@ export default function QuickActions(){
             <div className="text-sm text-slate-400">Convert speech to text</div>
           </div>
           <PlayIcon className="w-5 h-5 text-emerald-400" />
+        </button>
+
+        {/* 3. Create API Key */}
+        <button 
+          onClick={() => setShowKeyModal(true)} 
+          className="w-full flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-200 group"
+        >
+          <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+            <KeyIcon className="w-5 h-5 text-blue-400" />
+          </div>
+          <div className="flex-1 text-left">
+            <div className="font-medium text-slate-200">Create API Key</div>
+            <div className="text-sm text-slate-400">Generate a new API key</div>
+          </div>
+          <PlusIcon className="w-5 h-5 text-blue-400" />
+        </button>
+
+        {/* 4. Project API Key */}
+        <button 
+          onClick={() => setShowProjectKeyModal(true)} 
+          className="w-full flex items-center gap-3 p-4 rounded-xl bg-slate-800/30 border border-white/10 hover:bg-slate-800/50 transition-all duration-200 group"
+        >
+          <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center group-hover:bg-indigo-500/30 transition-colors">
+            <KeyIcon className="w-5 h-5 text-indigo-400" />
+          </div>
+          <div className="flex-1 text-left">
+            <div className="font-medium text-slate-200">Get Project API Key</div>
+            <div className="text-sm text-slate-400">Single key for the entire app</div>
+          </div>
+          <PlusIcon className="w-5 h-5 text-indigo-400" />
         </button>
       </div>
 
@@ -176,7 +198,7 @@ export default function QuickActions(){
               </button>
               <button 
                 onClick={handleCreateKey}
-                disabled={isProcessing || !newKeyName.trim() || selectedScopes.length===0}
+                disabled={isProcessing}
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
               >
                 {isProcessing ? (
@@ -227,10 +249,28 @@ export default function QuickActions(){
                   Target Language
                 </label>
                 <select className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50">
-                  <option>Spanish</option>
-                  <option>French</option>
-                  <option>German</option>
-                  <option>Japanese</option>
+                  <option>English</option>
+                  <option>Assamese</option>
+                  <option>Bengali</option>
+                  <option>Bodo</option>
+                  <option>Dogri</option>
+                  <option>Gujarati</option>
+                  <option>Hindi</option>
+                  <option>Kannada</option>
+                  <option>Kashmiri</option>
+                  <option>Konkani</option>
+                  <option>Maithili</option>
+                  <option>Malayalam</option>
+                  <option>Manipuri</option>
+                  <option>Marathi</option>
+                  <option>Odia</option>
+                  <option>Punjabi</option>
+                  <option>Sanskrit</option>
+                  <option>Santali</option>
+                  <option>Sindhi</option>
+                  <option>Tamil</option>
+                  <option>Telugu</option>
+                  <option>Urdu</option>
                 </select>
               </div>
             </div>
@@ -297,9 +337,27 @@ export default function QuickActions(){
                   </label>
                   <select className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
                     <option>English</option>
-                    <option>Spanish</option>
-                    <option>French</option>
-                    <option>German</option>
+                    <option>Assamese</option>
+                    <option>Bengali</option>
+                    <option>Bodo</option>
+                    <option>Dogri</option>
+                    <option>Gujarati</option>
+                    <option>Hindi</option>
+                    <option>Kannada</option>
+                    <option>Kashmiri</option>
+                    <option>Konkani</option>
+                    <option>Maithili</option>
+                    <option>Malayalam</option>
+                    <option>Manipuri</option>
+                    <option>Marathi</option>
+                    <option>Odia</option>
+                    <option>Punjabi</option>
+                    <option>Sanskrit</option>
+                    <option>Santali</option>
+                    <option>Sindhi</option>
+                    <option>Tamil</option>
+                    <option>Telugu</option>
+                    <option>Urdu</option>
                   </select>
                 </div>
                 <div>
@@ -307,10 +365,28 @@ export default function QuickActions(){
                     To Language
                   </label>
                   <select className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
-                    <option>Spanish</option>
-                    <option>French</option>
-                    <option>German</option>
-                    <option>Japanese</option>
+                    <option>Assamese</option>
+                    <option>Bengali</option>
+                    <option>Bodo</option>
+                    <option>Dogri</option>
+                    <option>Gujarati</option>
+                    <option>Hindi</option>
+                    <option>Kannada</option>
+                    <option>Kashmiri</option>
+                    <option>Konkani</option>
+                    <option>Maithili</option>
+                    <option>Malayalam</option>
+                    <option>Manipuri</option>
+                    <option>Marathi</option>
+                    <option>Nepali</option>
+                    <option>Odia</option>
+                    <option>Punjabi</option>
+                    <option>Sanskrit</option>
+                    <option>Santali</option>
+                    <option>Sindhi</option>
+                    <option>Tamil</option>
+                    <option>Telugu</option>
+                    <option>Urdu</option>
                   </select>
                 </div>
               </div>
@@ -340,6 +416,53 @@ export default function QuickActions(){
                   </>
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Project API Key Modal */}
+      {showProjectKeyModal && (
+        <div className="fixed inset-0 grid place-items-center z-50">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowProjectKeyModal(false)} />
+          <div className="relative bg-slate-900/95 backdrop-blur-xl p-8 rounded-3xl card border border-white/10 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-fuchsia-500 bg-clip-text text-transparent">
+                Project API Key
+              </h4>
+              <button 
+                onClick={() => setShowProjectKeyModal(false)}
+                className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors"
+              >
+                <XMarkIcon className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-sm text-slate-400">Use a single API key that combines permissions across your workspace.</p>
+              <div className="flex items-center gap-2 bg-slate-800/50 border border-white/10 rounded-xl px-3 py-2">
+                <code className="font-mono text-slate-200 text-sm truncate flex-1">{projectKey || 'Not generated yet'}</code>
+                <button
+                  onClick={async() => { try { await navigator.clipboard.writeText(projectKey || '') } catch {} }}
+                  disabled={!projectKey}
+                  className="px-3 py-1 text-sm rounded-lg bg-white/10 disabled:opacity-50"
+                >Copy</button>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowProjectKeyModal(false)}
+                className="px-6 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors duration-200"
+              >Close</button>
+              <button
+                onClick={() => {
+                  const key = `proj_live_${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 10)}`
+                  try { localStorage.setItem('project_api_key', key) } catch {}
+                  setProjectKey(key)
+                }}
+                className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-fuchsia-600 hover:from-indigo-600 hover:to-fuchsia-700 text-white rounded-xl font-medium transition-all duration-200"
+              >{projectKey ? 'Regenerate' : 'Generate'} Key</button>
             </div>
           </div>
         </div>
