@@ -22,6 +22,7 @@ export default function ApiKeysPage() {
   const [adminKey, setAdminKey] = useState<string>('')
   const [error, setError] = useState<string>('')
   const [createError, setCreateError] = useState<string>('')
+  const [isCreating, setIsCreating] = useState<boolean>(false)
 
   async function loadKeys(){
     setError('')
@@ -90,10 +91,21 @@ export default function ApiKeysPage() {
     if (selectedScopes.length === 0) { setCreateError('Select at least one scope.'); return }
     let created: any
     try {
+      setIsCreating(true)
       created = await api.createKey(newKeyName, selectedScopes, useKey)
     } catch (e: any) {
-      setCreateError(e?.message || 'Failed to create key')
+      // Provide clearer guidance for common network/CORS errors.
+      const msg = e?.message || 'Failed to create key'
+      const maybeCors = /Failed to fetch|NetworkError|TypeError/i.test(String(msg))
+      const backend = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:8000'
+      setCreateError(
+        maybeCors
+          ? `Failed to reach backend at ${backend}. Check that the server is running, CORS is enabled for this origin, and the URL (VITE_BACKEND_URL) is correct.`
+          : msg
+      )
       return
+    } finally {
+      setIsCreating(false)
     }
     const item: KeyItem = {
       id: created.id,
@@ -291,9 +303,10 @@ export default function ApiKeysPage() {
               </button>
               <button
                 onClick={createNewKey}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200"
+                disabled={isCreating}
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Create Key
+                {isCreating ? 'Creating…' : 'Create Key'}
               </button>
             </div>
           </div>
