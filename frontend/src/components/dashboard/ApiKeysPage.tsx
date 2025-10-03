@@ -14,7 +14,7 @@ const SAMPLE_KEYS: KeyItem[] = [
   { 
     id: 'key_live_1', 
     name: 'Training Portal Key', 
-    scopes: ['translate_text', 'glossary_read'], 
+    scopes: ['translate_text', 'document_translate_analyze'], 
     created: '2025-09-20', 
     status: 'ACTIVE',
     key: 'lk_live_1234567890abcdef'
@@ -30,7 +30,14 @@ const SAMPLE_KEYS: KeyItem[] = [
 ]
 
 export default function ApiKeysPage() {
-  const [keys, setKeys] = useState<KeyItem[]>(SAMPLE_KEYS)
+  const [keys, setKeys] = useState<KeyItem[]>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('created_api_keys') || '[]')
+      return [...SAMPLE_KEYS, ...stored]
+    } catch {
+      return SAMPLE_KEYS
+    }
+  })
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [newKeyName, setNewKeyName] = useState('')
@@ -40,8 +47,7 @@ export default function ApiKeysPage() {
     { id: 'translate_text', name: 'Translate Text', description: 'Translate text content' },
     { id: 'translate_audio', name: 'Translate Audio', description: 'Translate audio content' },
     { id: 'translate_video', name: 'Translate Video', description: 'Translate video content' },
-    { id: 'glossary_read', name: 'Read Glossary', description: 'Access glossary entries' },
-    { id: 'glossary_write', name: 'Write Glossary', description: 'Modify glossary entries' }
+    { id: 'document_translate_analyze', name: 'Translate/Analyze Document', description: 'Translate and summarize/analyze documents' }
   ]
 
   function revoke(id: string) {
@@ -73,6 +79,11 @@ export default function ApiKeysPage() {
     }
     
     setKeys(prev => [...prev, newKey])
+    try {
+      const existing = JSON.parse(localStorage.getItem('created_api_keys') || '[]')
+      existing.push(newKey)
+      localStorage.setItem('created_api_keys', JSON.stringify(existing))
+    } catch {}
     setNewKeyName('')
     setSelectedScopes([])
     setShowCreateModal(false)

@@ -16,6 +16,10 @@ export default function QuickActions(){
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [showAudioModal, setShowAudioModal] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [newKeyName, setNewKeyName] = useState('')
+  const [selectedScopes, setSelectedScopes] = useState<string[]>([])
+  const [selectedDocFile, setSelectedDocFile] = useState<File | null>(null)
+  const [selectedAudioFile, setSelectedAudioFile] = useState<File | null>(null)
 
   const handleCreateKey = () => {
     setIsProcessing(true)
@@ -23,6 +27,23 @@ export default function QuickActions(){
       setIsProcessing(false)
       setShowKeyModal(false)
       // You could add a success notification here
+      // reset
+      setNewKeyName('')
+      setSelectedScopes([])
+      // Persist created key so API keys list can show it
+      const newKey = {
+        id: `key_live_${Date.now()}`,
+        name: newKeyName || 'New API Key',
+        scopes: selectedScopes,
+        created: new Date().toISOString().split('T')[0],
+        status: 'ACTIVE',
+        key: `lk_live_${Math.random().toString(36).substring(2, 18)}`
+      }
+      try {
+        const existing = JSON.parse(localStorage.getItem('created_api_keys') || '[]')
+        existing.push(newKey)
+        localStorage.setItem('created_api_keys', JSON.stringify(existing))
+      } catch {}
     }, 1500)
   }
 
@@ -32,6 +53,7 @@ export default function QuickActions(){
       setIsProcessing(false)
       setShowUploadModal(false)
       // You could add a success notification here
+      setSelectedDocFile(null)
     }, 2000)
   }
 
@@ -41,6 +63,7 @@ export default function QuickActions(){
       setIsProcessing(false)
       setShowAudioModal(false)
       // You could add a success notification here
+      setSelectedAudioFile(null)
     }, 2500)
   }
 
@@ -118,6 +141,8 @@ export default function QuickActions(){
                 </label>
                 <input
                   type="text"
+                  value={newKeyName}
+                  onChange={(e)=>setNewKeyName(e.target.value)}
                   placeholder="Enter a descriptive name"
                   className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent"
                 />
@@ -128,10 +153,14 @@ export default function QuickActions(){
                   Scopes
                 </label>
                 <div className="space-y-2">
-                  {['translate_text', 'translate_audio', 'glossary_read'].map(scope => (
+                  {['translate_text', 'translate_audio', 'translate_video', 'document_translate_analyze'].map(scope => (
                     <label key={scope} className="flex items-center gap-3">
-                      <input type="checkbox" className="w-4 h-4 text-blue-500 bg-slate-700 border-slate-600 rounded" />
-                      <span className="text-sm text-slate-300">{scope.replace('_', ' ')}</span>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedScopes.includes(scope)}
+                        onChange={() => setSelectedScopes(prev => prev.includes(scope) ? prev.filter(s=>s!==scope) : [...prev, scope])}
+                        className="w-4 h-4 text-blue-500 bg-slate-700 border-slate-600 rounded" />
+                      <span className="text-sm text-slate-300">{scope.replaceAll('_', ' ')}</span>
                     </label>
                   ))}
                 </div>
@@ -147,7 +176,7 @@ export default function QuickActions(){
               </button>
               <button 
                 onClick={handleCreateKey}
-                disabled={isProcessing}
+                disabled={isProcessing || !newKeyName.trim() || selectedScopes.length===0}
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
               >
                 {isProcessing ? (
@@ -185,12 +214,13 @@ export default function QuickActions(){
             </div>
             
             <div className="space-y-4">
-              <div className="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center hover:border-purple-500/50 transition-colors cursor-pointer">
+              <label className="block border-2 border-dashed border-slate-600 rounded-xl p-8 text-center hover:border-purple-500/50 transition-colors cursor-pointer">
+                <input type="file" accept=".pdf,.doc,.docx,.txt" className="hidden" onChange={(e)=> setSelectedDocFile(e.target.files?.[0] || null)} />
                 <DocumentArrowUpIcon className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                <p className="text-slate-300 mb-2">Drop your document here</p>
+                <p className="text-slate-300 mb-2">{selectedDocFile ? selectedDocFile.name : 'Drop your document here'}</p>
                 <p className="text-sm text-slate-400">or click to browse</p>
                 <p className="text-xs text-slate-500 mt-2">Supports PDF, DOC, TXT (max 10MB)</p>
-              </div>
+              </label>
               
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -214,7 +244,7 @@ export default function QuickActions(){
               </button>
               <button 
                 onClick={handleUploadDocument}
-                disabled={isProcessing}
+                disabled={isProcessing || !selectedDocFile}
                 className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
               >
                 {isProcessing ? (
@@ -252,12 +282,13 @@ export default function QuickActions(){
             </div>
             
             <div className="space-y-4">
-              <div className="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center hover:border-emerald-500/50 transition-colors cursor-pointer">
+              <label className="block border-2 border-dashed border-slate-600 rounded-xl p-8 text-center hover:border-emerald-500/50 transition-colors cursor-pointer">
+                <input type="file" accept="audio/*" className="hidden" onChange={(e)=> setSelectedAudioFile(e.target.files?.[0] || null)} />
                 <SpeakerWaveIcon className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                <p className="text-slate-300 mb-2">Drop your audio file here</p>
+                <p className="text-slate-300 mb-2">{selectedAudioFile ? selectedAudioFile.name : 'Drop your audio file here'}</p>
                 <p className="text-sm text-slate-400">or click to browse</p>
                 <p className="text-xs text-slate-500 mt-2">Supports MP3, WAV, M4A (max 25MB)</p>
-              </div>
+              </label>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -294,7 +325,7 @@ export default function QuickActions(){
               </button>
               <button 
                 onClick={handleTranslateAudio}
-                disabled={isProcessing}
+                disabled={isProcessing || !selectedAudioFile}
                 className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
               >
                 {isProcessing ? (
